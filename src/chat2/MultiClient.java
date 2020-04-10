@@ -61,7 +61,7 @@ public class MultiClient {
 						break;
 					}
 					else {
-						//만약 q가 아니면 서버로 입력내용 전송
+						/////만약 q가 아니면 서버로 입력내용 전송
 						out.println(s2);
 					}
 				}
