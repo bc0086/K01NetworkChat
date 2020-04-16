@@ -110,6 +110,52 @@ public class MultiServer {
 		ms.init();		
 	}
 	
+	// /to 홍길동 안녕하세요 (엔터) <- 홍길동한테만 메세지를 보여주면 됩니다.(귓속말)
+	// secret 확인1 start
+	public void secret(String name, String msg) {
+		
+		// Map에 저장된 객체의 키값(이름)을 먼저 얻어온다.
+				Iterator<String> it = clientMap.keySet().iterator();
+				
+				try { // 각 클라이언트의 PrintWriter객체를 얻어온다.
+					PrintWriter list_out = (PrintWriter)
+							// clientMap.get(it.next());
+							clientMap.get(name); // 이름만 얻어온다.
+					
+					// 클라이언트에게 메세지를 전달한다.
+					list_out.println(clientMap.size() + "명 접속중입니다.");
+					list_out.println("[접속자 이름] = "+clientMap.keySet());
+				}
+				
+				catch(Exception e) {
+					System.out.println("예외 :"+e);
+				}
+	} 
+	// secret 확인1 end
+	
+	// /list : 서버의 접속자 리스트를 자기화면에 출력하면 됩니다.
+	// list 확인1 start
+	public void list(String name, String msg) {
+		
+		// Map에 저장된 객체의 키값(이름)을 먼저 얻어온다.
+		Iterator<String> it = clientMap.keySet().iterator();
+		
+		try { // 각 클라이언트의 PrintWriter객체를 얻어온다.
+			PrintWriter list_out = (PrintWriter)
+					// clientMap.get(it.next());
+					clientMap.get(name); // 이름만 얻어온다.
+			
+			// 클라이언트에게 메세지를 전달한다.
+			list_out.println(clientMap.size() + "명 접속중입니다.");
+			list_out.println("[접속자 이름] = "+clientMap.keySet());
+		}
+		
+		catch(Exception e) {
+			System.out.println("예외 :"+e);
+		}
+	}
+	// list 확인1 end
+	
 	// 접속된 모든 클라이언트에게 메세지를 전달하는 역할의 메소드
 	public void sendAllMsg(String name, String msg) {
 		
@@ -123,17 +169,13 @@ public class MultiServer {
 				PrintWriter it_out = (PrintWriter)
 				clientMap.get(it.next());
 				
-				// 클라이언트에게 메세지를 전달한다.
-				/*
-				 매개변수 name이 있는 경우에는 이름 + 메세지
-				 없는 경우에는 메세지만 클라이언트로 전달한다.
-				 */
+				// 클라이언트에게 메세지를 전달한다.				
 				// 클라이언트로 한글을 보낼 때 인코딩
-				if(name.equals(" ")) {
+				if(name.equals(" ")) { //name이 없는 경우 메세지만 클라이언트로 전달
 					it_out.println(URLEncoder.encode(msg, "UTF-8"));
 				}
-				else {
-					it_out.println("["+name+"]:" + msg);
+				else { // name이 있는 경우에는 이름+메세지 전달
+					it_out.println("["+name+"] :" + msg);
 				}
 			}						
 			catch(Exception e) {
@@ -190,12 +232,6 @@ public class MultiServer {
 				// HashMap에 저장된 객체의 수로 접속자 수를 파악할 수 있다.
 				System.out.println(name + " 접속");
 				System.out.println(" 현재 접속자 수는 "+clientMap.size()+"명입니다.");
-				
-//				if(s.equalsIgnoreCase("/list")) {
-//					System.out.println("저장된 객체수:"+ clientMap.size());
-//					System.out.println("키값을 알때:"+ clientMap.get("name"));
-//				}						
-//				
 											
 				// 입력한 메세지는 모든 클라이언트에게 Echo된다.
 				while(in != null) {
@@ -206,10 +242,24 @@ public class MultiServer {
 					
 					if(s == null) break;
 					
+					// list 확인2 start
+					try {
+							if(s.equals("/list")) {
+								System.out.println(name +" 접속 리스트 확인");
+								list(name, s);
+								continue;
+							}
+					}
+					
+					catch(Exception e) {
+						System.out.println("예외 : "+ e);
+					}						
+					// list 확인2 end
+					
 					System.out.println(name + ">>" + s);
 					sendAllMsg(name, s);
 					
-					/////////////////추가된 부분///////////////////////////
+					// jdbc연동 start
 					try	{
 						//1.쿼리문준비 : 값의 세팅이 필요한 부분을 ?로 대체한다.
 						String Query = "insert into chatting_tb values (seq_num.nextval, ?,?,?)";
@@ -247,6 +297,7 @@ public class MultiServer {
 							}
 						}
 					}
+					// jdbc연동 end
 				}
 			}
 			
